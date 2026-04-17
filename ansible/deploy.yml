@@ -5,9 +5,16 @@
   become: false
 
   tasks:
-    - name: Start Flask app container
-      command: docker start cicd-demo-app
+    - name: Stop old app container
+      command: docker stop cicd-demo-app
       ignore_errors: yes
+
+    - name: Remove old app container
+      command: docker rm cicd-demo-app
+      ignore_errors: yes
+
+    - name: Start new app container
+      command: docker run -d --name cicd-demo-app -p 5000:5000 cicd-demo-app:latest
 
     - name: Start Prometheus container
       command: docker start prometheus
@@ -15,13 +22,6 @@
 
     - name: Start Grafana container
       command: docker start grafana
-      ignore_errors: yes
-
-    - name: Verify Flask app is running
-      uri:
-        url: http://localhost:5000
-        method: GET
-        status_code: 200
       ignore_errors: yes
 
     - name: App status

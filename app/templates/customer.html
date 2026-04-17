@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ReadNest — Library</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{--brown:#4a2c2a;--accent:#c0874f;--accent-h:#a8713d;--cream:#fdf6ee;--card:#fff;--border:#e2d5c8;--muted:#8a7a70;--green:#27ae60;--red:#c0392b}
+    body{font-family:'Inter',sans-serif;background:var(--cream);color:#2d2d2d}
+    nav{background:var(--brown);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:60px;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(0,0,0,.2)}
+    .brand{font-family:'Playfair Display',serif;color:#fff;font-size:1.5rem}.brand span{color:var(--accent)}
+    .nav-r{display:flex;align-items:center;gap:1rem}
+    .nav-r span{color:rgba(255,255,255,.7);font-size:.88rem}
+    .nav-r a{color:rgba(255,255,255,.8);text-decoration:none;font-size:.88rem;font-weight:500;background:rgba(255,255,255,.15);padding:.35rem .9rem;border-radius:6px}
+    .nav-r a:hover{color:#fff}
+    .hero{background:linear-gradient(135deg,var(--brown),#7a4a3a);color:#fff;padding:2.5rem 2rem;text-align:center}
+    .hero h1{font-family:'Playfair Display',serif;font-size:2.2rem;margin-bottom:.4rem}
+    .hero p{opacity:.85;margin-bottom:1.2rem}
+    .search-wrap{display:flex;max-width:480px;margin:0 auto;background:#fff;border-radius:40px;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,.2)}
+    .search-wrap input{flex:1;padding:.7rem 1.2rem;border:none;outline:none;font-size:.95rem;color:#333}
+    .search-wrap button{padding:.7rem 1.4rem;background:var(--accent);color:#fff;border:none;cursor:pointer;font-weight:600}
+    .search-wrap button:hover{background:var(--accent-h)}
+    .container{max-width:1100px;margin:0 auto;padding:0 1.5rem}
+    .tabs{display:flex;gap:.5rem;padding:1.2rem 0 .5rem;border-bottom:2px solid var(--border);margin-bottom:1.2rem}
+    .tab-btn{padding:.45rem 1.1rem;border-radius:20px;border:1.5px solid var(--border);background:#fff;font-size:.88rem;font-weight:500;cursor:pointer;color:var(--muted);transition:all .2s}
+    .tab-btn.active{background:var(--brown);color:#fff;border-color:var(--brown)}
+    .filter-row{display:flex;gap:.75rem;align-items:center;margin-bottom:1.2rem;flex-wrap:wrap}
+    select.fslt{padding:.45rem .9rem;border:1.5px solid var(--border);border-radius:8px;font-size:.85rem;background:#fff;outline:none;cursor:pointer}
+    .spacer{flex:1}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.1rem;padding-bottom:3rem}
+    .book-card{background:var(--card);border-radius:14px;border:1px solid var(--border);overflow:hidden;display:flex;flex-direction:column;transition:transform .2s,box-shadow .2s}
+    .book-card:hover{transform:translateY(-3px);box-shadow:0 8px 22px rgba(0,0,0,.1)}
+    .cover{height:130px;display:flex;align-items:center;justify-content:center;font-size:3.2rem;background:linear-gradient(135deg,#f3e9de,#e8d8c8)}
+    .body{padding:.9rem;flex:1;display:flex;flex-direction:column;gap:.28rem}
+    .btitle{font-family:'Playfair Display',serif;font-size:1rem;color:var(--brown);line-height:1.3}
+    .bauthor{font-size:.8rem;color:var(--muted)}
+    .genre-tag{display:inline-block;background:#f3e9e0;color:#8b5e3c;border-radius:20px;padding:.18rem .65rem;font-size:.73rem;font-weight:500;width:fit-content}
+    .bdesc{font-size:.8rem;color:var(--muted);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .bfooter{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:.5rem}
+    .bprice{font-weight:700;color:var(--brown);font-size:.95rem}
+    .avail{font-size:.75rem;font-weight:600}
+    .avail.ok{color:var(--green)}.avail.no{color:var(--red)}
+    .card-actions{display:flex;gap:.5rem;padding:.65rem .9rem .9rem;border-top:1px solid var(--border)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;padding:.45rem .9rem;border:none;border-radius:7px;font-size:.83rem;font-weight:500;cursor:pointer;transition:background .2s}
+    .btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent-h)}
+    .btn-outline{background:transparent;border:1.5px solid var(--border);color:#2d2d2d}.btn-outline:hover{background:var(--border)}
+    .btn-danger{background:var(--red);color:#fff}.btn-danger:hover{background:#a93226}
+    .btn-sm{padding:.35rem .75rem;font-size:.79rem}
+    .empty{text-align:center;padding:3.5rem 1rem;color:var(--muted);grid-column:1/-1}
+    .empty .icon{font-size:3rem;margin-bottom:.75rem}
+    .rental-list{display:flex;flex-direction:column;gap:.75rem;padding-bottom:3rem}
+    .rental-row{background:#fff;border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+    .rental-icon{font-size:2rem}
+    .rental-info{flex:1;min-width:180px}
+    .rental-info .rtitle{font-weight:600;color:var(--brown)}
+    .rental-info .rmeta{font-size:.8rem;color:var(--muted);margin-top:.15rem}
+    .status-badge{font-size:.75rem;font-weight:600;padding:.25rem .7rem;border-radius:20px}
+    .s-active{background:#d4edda;color:var(--green)}.s-returned{background:#e2e3e5;color:#555}.s-overdue{background:#fce4e4;color:var(--red)}
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .2s}
+    .overlay.open{opacity:1;pointer-events:all}
+    .modal{background:#fff;border-radius:16px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,.25);transform:translateY(20px);transition:transform .25s;overflow:hidden}
+    .overlay.open .modal{transform:translateY(0)}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.4rem;border-bottom:1px solid var(--border)}
+    .modal-header h2{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--brown)}
+    .mclose{background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--muted)}
+    .modal-body{padding:1.4rem;display:flex;flex-direction:column;gap:1rem}
+    .field label{display:block;font-size:.8rem;font-weight:600;margin-bottom:.3rem}
+    .field input{width:100%;padding:.6rem .85rem;border:1.5px solid var(--border);border-radius:8px;font-size:.9rem;font-family:inherit;outline:none;transition:border-color .2s}
+    .field input:focus{border-color:var(--accent)}
+    .modal-footer{padding:.9rem 1.4rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:.75rem}
+    .info-box{background:#f5ede3;border-radius:8px;padding:.7rem 1rem;font-size:.82rem;color:var(--brown);line-height:1.5}
+    .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--brown);color:#fff;padding:.7rem 1.2rem;border-radius:9px;font-size:.87rem;z-index:300;opacity:0;transform:translateY(8px);transition:opacity .3s,transform .3s;pointer-events:none}
+    .toast.show{opacity:1;transform:translateY(0)}
+    @media(max-width:600px){.grid{grid-template-columns:1fr}.rental-row{flex-direction:column;align-items:flex-start}}
+  </style>
+</head>
+<body>
+<nav>
+  <div class="brand">Read<span>Nest</span></div>
+  <div class="nav-r">
+    <span id="nav-name"></span>
+    <a href="/logout">Sign Out</a>
+  </div>
+</nav>
+<div class="hero">
+  <h1>Welcome to ReadNest Library</h1>
+  <p>Browse our collection and rent books at your fingertips.</p>
+  <div class="search-wrap">
+    <input id="search-input" placeholder="Search by title or author…" onkeydown="if(event.key==='Enter')doSearch()"/>
+    <button onclick="doSearch()">Search</button>
+  </div>
+</div>
+<div class="container">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('browse')">📚 Browse Books</button>
+    <button class="tab-btn" onclick="showTab('rentals')">🗂️ My Rentals</button>
+  </div>
+  <div id="tab-browse">
+    <div class="filter-row">
+      <select class="fslt" id="genre-filter" onchange="applyFilter()"><option value="">All Genres</option></select>
+      <select class="fslt" id="avail-filter" onchange="applyFilter()">
+        <option value="">All Availability</option>
+        <option value="yes">Available</option>
+        <option value="no">Unavailable</option>
+      </select>
+      <div class="spacer"></div>
+      <button class="btn btn-outline btn-sm" onclick="loadBooks()">↻ Refresh</button>
+    </div>
+    <div class="grid" id="books-grid"></div>
+  </div>
+  <div id="tab-rentals" style="display:none">
+    <div class="rental-list" id="rental-list"></div>
+  </div>
+</div>
+<div class="overlay" id="rent-overlay" onclick="maybeClose(event)">
+  <div class="modal">
+    <div class="modal-header"><h2>Rent Book</h2><button class="mclose" onclick="closeRent()">✕</button></div>
+    <div class="modal-body">
+      <div id="rent-book-info" class="info-box"></div>
+      <div class="field"><label>Rental Duration (days)</label><input id="rent-days" type="number" min="1" max="30" value="7"/></div>
+      <div id="rent-cost-preview" style="font-size:.85rem;color:var(--muted)"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeRent()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmRent()">Confirm Rental</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+let allBooks=[],currentRentBookId=null,currentRentPPD=0;
+const EMOJIS={Fiction:'📚','Non-Fiction':'📖',Science:'🔬',Biography:'🎭',Technology:'💻',History:'🏛',Romance:'💕',Mystery:'🔍',General:'📗'};
+async function init(){
+  const me=await(await fetch('/api/me')).json();
+  document.getElementById('nav-name').textContent=me.name;
+  await loadGenres();await loadBooks();
+}
+async function loadGenres(){
+  const gs=await(await fetch('/api/genres')).json();
+  const sel=document.getElementById('genre-filter');
+  gs.forEach(g=>sel.insertAdjacentHTML('beforeend',`<option value="${g}">${g}</option>`));
+}
+async function loadBooks(){
+  allBooks=await(await fetch('/api/books')).json();
+  renderGrid(allBooks);
+}
+async function doSearch(){
+  const q=document.getElementById('search-input').value.trim();
+  if(!q){renderGrid(allBooks);return;}
+  const data=await(await fetch(`/api/books?q=${encodeURIComponent(q)}`)).json();
+  renderGrid(data);
+}
+function applyFilter(){
+  const genre=document.getElementById('genre-filter').value;
+  const avail=document.getElementById('avail-filter').value;
+  let f=allBooks;
+  if(genre)f=f.filter(b=>b.genre===genre);
+  if(avail==='yes')f=f.filter(b=>b.available_copies>0);
+  if(avail==='no')f=f.filter(b=>b.available_copies===0);
+  renderGrid(f);
+}
+function renderGrid(books){
+  const grid=document.getElementById('books-grid');
+  if(!books.length){grid.innerHTML=`<div class="empty"><div class="icon">📭</div><p>No books found.</p></div>`;return;}
+  grid.innerHTML=books.map(b=>{
+    const icon=EMOJIS[b.genre]||'📘';
+    const avail=b.available_copies>0;
+    return `<div class="book-card">
+      <div class="cover">${icon}</div>
+      <div class="body">
+        <div class="btitle">${esc(b.title)}</div>
+        <div class="bauthor">by ${esc(b.author)}</div>
+        <span class="genre-tag">${esc(b.genre)}</span>
+        ${b.description?`<div class="bdesc">${esc(b.description)}</div>`:''}
+        <div class="bfooter">
+          <div class="bprice">₹${b.rental_price_per_day}/day</div>
+          <span class="avail ${avail?'ok':'no'}">${avail?b.available_copies+' available':'Unavailable'}</span>
+        </div>
+      </div>
+      <div class="card-actions">
+        ${avail?`<button class="btn btn-primary" style="flex:1" onclick="openRent(${b.id},'${esc(b.title)}',${b.rental_price_per_day})">Rent Now</button>`:
+                 `<button class="btn btn-outline" style="flex:1" disabled>Not Available</button>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+function openRent(id,title,ppd){
+  currentRentBookId=id;currentRentPPD=ppd;
+  document.getElementById('rent-book-info').textContent='📖  '+title+'  —  ₹'+ppd+' per day';
+  document.getElementById('rent-days').value=7;
+  updateCostPreview();
+  document.getElementById('rent-overlay').classList.add('open');
+}
+function updateCostPreview(){
+  const days=parseInt(document.getElementById('rent-days').value)||0;
+  document.getElementById('rent-cost-preview').textContent=`Estimated cost: ₹${(days*currentRentPPD).toFixed(2)} for ${days} day(s)`;
+}
+document.addEventListener('DOMContentLoaded',()=>{document.getElementById('rent-days').addEventListener('input',updateCostPreview);});
+function closeRent(){document.getElementById('rent-overlay').classList.remove('open');}
+function maybeClose(e){if(e.target.id==='rent-overlay')closeRent();}
+async function confirmRent(){
+  const days=parseInt(document.getElementById('rent-days').value);
+  if(!days||days<1||days>30){toast('Enter valid days (1-30)',true);return;}
+  const res=await fetch('/api/rent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({book_id:currentRentBookId,days})});
+  const data=await res.json();
+  if(!res.ok){toast(data.error||'Error renting book',true);return;}
+  closeRent();await loadBooks();
+  toast(`📚 Rented! Due: ${data.due_date} — Total: ₹${data.cost}`);
+}
+async function loadRentals(){
+  const rentals=await(await fetch('/api/my-rentals')).json();
+  const list=document.getElementById('rental-list');
+  if(!rentals.length){list.innerHTML=`<div class="empty"><div class="icon">🗂️</div><p>No rentals yet. Go browse some books!</p></div>`;return;}
+  list.innerHTML=rentals.map(r=>{
+    const badge=r.status==='active'?'s-active':r.status==='returned'?'s-returned':'s-overdue';
+    const label=r.status==='active'?'Active':r.status==='returned'?'Returned':'Overdue';
+    return `<div class="rental-row">
+      <div class="rental-icon">📖</div>
+      <div class="rental-info">
+        <div class="rtitle">${esc(r.book_title)}</div>
+        <div class="rmeta">Rented: ${r.rented_on} | Due: ${r.due_date}${r.returned_on?' | Returned: '+r.returned_on:''} | Cost: ₹${r.cost}</div>
+      </div>
+      <span class="status-badge ${badge}">${label}</span>
+      ${r.status==='active'?`<button class="btn btn-danger btn-sm" onclick="returnBook(${r.id})">Return</button>`:''}
+    </div>`;
+  }).join('');
+}
+async function returnBook(id){
+  if(!confirm('Return this book?'))return;
+  const res=await fetch(`/api/return/${id}`,{method:'POST'});
+  const data=await res.json();
+  if(!res.ok){toast(data.error||'Error',true);return;}
+  await loadBooks();await loadRentals();toast('Book returned successfully!');
+}
+function showTab(tab){
+  document.getElementById('tab-browse').style.display=tab==='browse'?'':'none';
+  document.getElementById('tab-rentals').style.display=tab==='rentals'?'':'none';
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',(i===0&&tab==='browse')||(i===1&&tab==='rentals')));
+  if(tab==='rentals')loadRentals();
+}
+function toast(msg,err=false){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.style.background=err?'var(--red)':'var(--brown)';
+  el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh 'docker build -t cicd-demo-app:latest ./app'
+                }
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh 'echo "No tests yet"'
+            }
+        }
+
+        stage('Push to Registry (placeholder)') {
+            steps {
+                echo 'Here you would docker login and docker push'
+            }
+        }
+
+        stage('Deploy with Ansible') {
+            steps {
+                sh 'ansible-playbook -i ansible/inventory ansible/deploy.yml'
+            }
+        }
+    }
+}

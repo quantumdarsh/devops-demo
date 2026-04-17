@@ -1,0 +1,9 @@
+---
+- name: Deploy CI/CD demo stack locally
+  hosts: local
+  become: false
+  tasks:
+    - name: Ensure Docker Compose stack is up
+      ansible.builtin.command: docker compose up -d
+      args:
+        chdir: "{{ playbook_dir }}/.."

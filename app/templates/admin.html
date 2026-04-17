@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ReadNest — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{--brown:#4a2c2a;--accent:#c0874f;--accent-h:#a8713d;--cream:#fdf6ee;--card:#fff;--border:#e2d5c8;--muted:#8a7a70;--green:#27ae60;--red:#c0392b}
+    body{font-family:'Inter',sans-serif;background:#f4f0eb;color:#2d2d2d;display:flex;min-height:100vh}
+    .sidebar{width:220px;background:var(--brown);display:flex;flex-direction:column;padding:1.5rem 0;position:fixed;top:0;left:0;height:100vh;z-index:10}
+    .sidebar .brand{font-family:'Playfair Display',serif;color:#fff;font-size:1.4rem;padding:0 1.3rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.12)}
+    .sidebar .brand span{color:var(--accent)}
+    .sidebar .badge{font-size:.68rem;background:var(--accent);color:#fff;padding:.1rem .5rem;border-radius:10px;margin-left:.4rem;vertical-align:middle}
+    .sidebar nav{flex:1;padding:1rem 0}
+    .nav-item{display:flex;align-items:center;gap:.65rem;padding:.7rem 1.3rem;color:rgba(255,255,255,.7);cursor:pointer;font-size:.9rem;font-weight:500;transition:all .2s;border-left:3px solid transparent;text-decoration:none}
+    .nav-item:hover{background:rgba(255,255,255,.07);color:#fff}
+    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:var(--accent)}
+    .nav-item .ico{font-size:1.1rem}
+    .sidebar-footer{padding:1rem 1.3rem;border-top:1px solid rgba(255,255,255,.12)}
+    .sidebar-footer a{color:rgba(255,255,255,.6);font-size:.83rem;text-decoration:none}
+    .sidebar-footer a:hover{color:#fff}
+    .main{margin-left:220px;flex:1;padding:2rem;min-height:100vh}
+    .page-header{margin-bottom:1.5rem}
+    .page-header h1{font-family:'Playfair Display',serif;font-size:1.7rem;color:var(--brown)}
+    .page-header p{color:var(--muted);font-size:.88rem;margin-top:.2rem}
+    .stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.8rem}
+    .stat{background:var(--card);border-radius:12px;padding:1.1rem 1.3rem;border:1px solid var(--border)}
+    .stat .val{font-size:2rem;font-weight:700;color:var(--brown)}
+    .stat .lbl{font-size:.78rem;color:var(--muted);margin-top:.2rem}
+    .stat.red .val{color:var(--red)}.stat.green .val{color:var(--green)}
+    .section{background:var(--card);border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:1.5rem;display:none}
+    .section.active{display:block}
+    .section-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--border)}
+    .section-header h2{font-size:1rem;font-weight:600;color:var(--brown)}
+    table{width:100%;border-collapse:collapse;font-size:.86rem}
+    th{padding:.6rem 1rem;background:#faf5f0;text-align:left;font-weight:600;color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.4px}
+    td{padding:.65rem 1rem;border-top:1px solid var(--border);color:#2d2d2d;vertical-align:middle}
+    tr:hover td{background:#fdf8f4}
+    .badge2{font-size:.72rem;font-weight:600;padding:.22rem .6rem;border-radius:20px}
+    .s-active{background:#d4edda;color:var(--green)}.s-returned{background:#e2e3e5;color:#555}.s-overdue{background:#fce4e4;color:var(--red)}
+    .btn{display:inline-flex;align-items:center;gap:.3rem;padding:.42rem .9rem;border:none;border-radius:7px;font-size:.82rem;font-weight:500;cursor:pointer;transition:background .2s}
+    .btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent-h)}
+    .btn-outline{background:transparent;border:1.5px solid var(--border);color:#2d2d2d}.btn-outline:hover{background:var(--border)}
+    .btn-danger{background:var(--red);color:#fff}.btn-danger:hover{background:#a93226}
+    .btn-sm{padding:.3rem .7rem;font-size:.78rem}
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .2s}
+    .overlay.open{opacity:1;pointer-events:all}
+    .modal{background:#fff;border-radius:14px;width:100%;max-width:460px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 50px rgba(0,0,0,.22);transform:translateY(18px);transition:transform .25s}
+    .overlay.open .modal{transform:translateY(0)}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.4rem;border-bottom:1px solid var(--border)}
+    .modal-header h2{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--brown)}
+    .mclose{background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--muted)}
+    .modal-body{padding:1.3rem;display:flex;flex-direction:column;gap:.9rem}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:.85rem}
+    .field label{display:block;font-size:.79rem;font-weight:600;margin-bottom:.28rem}
+    .field input,.field select,.field textarea{width:100%;padding:.58rem .85rem;border:1.5px solid var(--border);border-radius:8px;font-size:.88rem;font-family:inherit;outline:none;transition:border-color .2s}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent)}
+    .field textarea{resize:vertical;min-height:72px}
+    .modal-footer{padding:.9rem 1.4rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:.7rem}
+    .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--brown);color:#fff;padding:.7rem 1.2rem;border-radius:9px;font-size:.87rem;z-index:300;opacity:0;transform:translateY(8px);transition:opacity .3s,transform .3s;pointer-events:none}
+    .toast.show{opacity:1;transform:translateY(0)}
+    .empty-row td{text-align:center;color:var(--muted);padding:2rem}
+    @media(max-width:700px){.sidebar{display:none}.main{margin-left:0}.form-row{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="brand">Read<span>Nest</span> <span class="badge">Admin</span></div>
+  <nav>
+    <a class="nav-item active" onclick="showSection('overview')" href="#"><span class="ico">📊</span> Overview</a>
+    <a class="nav-item" onclick="showSection('books')" href="#"><span class="ico">📚</span> Books</a>
+    <a class="nav-item" onclick="showSection('rentals')" href="#"><span class="ico">🗂️</span> Rentals</a>
+    <a class="nav-item" onclick="showSection('users')" href="#"><span class="ico">👥</span> Members</a>
+  </nav>
+  <div class="sidebar-footer"><a href="/logout">⬅ Sign Out</a></div>
+</aside>
+<div class="main">
+  <div class="page-header"><h1>Admin Dashboard</h1><p>Manage the ReadNest library system.</p></div>
+  <div class="stats-row" id="stats-row"></div>
+  <div class="section active" id="sec-overview">
+    <div class="section-header"><h2>Recent Rentals</h2></div>
+    <table><thead><tr><th>Member</th><th>Book</th><th>Rented</th><th>Due</th><th>Status</th></tr></thead>
+    <tbody id="overview-tbody"></tbody></table>
+  </div>
+  <div class="section" id="sec-books">
+    <div class="section-header"><h2>Book Catalogue</h2><button class="btn btn-primary btn-sm" onclick="openAddBook()">＋ Add Book</button></div>
+    <table><thead><tr><th>Title</th><th>Author</th><th>Genre</th><th>Price/day</th><th>Copies</th><th>Available</th><th>Actions</th></tr></thead>
+    <tbody id="books-tbody"></tbody></table>
+  </div>
+  <div class="section" id="sec-rentals">
+    <div class="section-header">
+      <h2>All Rentals</h2>
+      <select id="rental-status-filter" onchange="loadRentals()" style="padding:.35rem .7rem;border:1.5px solid var(--border);border-radius:7px;font-size:.83rem;outline:none;cursor:pointer">
+        <option value="">All</option><option value="active">Active</option><option value="returned">Returned</option>
+      </select>
+    </div>
+    <table><thead><tr><th>Member</th><th>Book</th><th>Rented On</th><th>Due Date</th><th>Cost</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody id="rentals-tbody"></tbody></table>
+  </div>
+  <div class="section" id="sec-users">
+    <div class="section-header"><h2>Registered Members</h2></div>
+    <table><thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead>
+    <tbody id="users-tbody"></tbody></table>
+  </div>
+</div>
+<div class="overlay" id="book-overlay" onclick="maybeCloseBook(event)">
+  <div class="modal">
+    <div class="modal-header"><h2 id="book-modal-title">Add Book</h2><button class="mclose" onclick="closeBookModal()">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="b-id"/>
+      <div class="form-row">
+        <div class="field"><label>Title *</label><input id="b-title" placeholder="Book title"/></div>
+        <div class="field"><label>Author *</label><input id="b-author" placeholder="Author name"/></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Genre</label>
+          <select id="b-genre"><option>Fiction</option><option>Non-Fiction</option><option>Science</option><option>Biography</option><option>Technology</option><option>History</option><option>Romance</option><option>Mystery</option><option>General</option></select>
+        </div>
+        <div class="field"><label>Copies</label><input id="b-copies" type="number" min="1" value="1"/></div>
+      </div>
+      <div class="field"><label>Rental Price / day (₹) *</label><input id="b-price" type="number" step="0.5" placeholder="e.g. 10"/></div>
+      <div class="field"><label>Description</label><textarea id="b-desc" placeholder="Short description…"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeBookModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBook()">Save Book</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+async function init(){await loadStats();await loadOverview();}
+function showSection(name){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('sec-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item')[['overview','books','rentals','users'].indexOf(name)].classList.add('active');
+  if(name==='books')loadBooks();
+  else if(name==='rentals')loadRentals();
+  else if(name==='users')loadUsers();
+  else{loadStats();loadOverview();}
+}
+async function loadStats(){
+  const s=await(await fetch('/api/admin/stats')).json();
+  document.getElementById('stats-row').innerHTML=`
+    <div class="stat"><div class="val">${s.total_books}</div><div class="lbl">Books</div></div>
+    <div class="stat green"><div class="val">${s.total_users}</div><div class="lbl">Members</div></div>
+    <div class="stat"><div class="val">${s.active_rentals}</div><div class="lbl">Active Rentals</div></div>
+    <div class="stat"><div class="val">${s.total_rentals}</div><div class="lbl">Total Rentals</div></div>
+    <div class="stat red"><div class="val">${s.overdue}</div><div class="lbl">Overdue</div></div>`;
+}
+async function loadOverview(){
+  const rentals=await(await fetch('/api/admin/rentals')).json();
+  const tbody=document.getElementById('overview-tbody');
+  const recent=rentals.slice(0,8);
+  tbody.innerHTML=recent.length?recent.map(r=>`<tr>
+    <td>${esc(r.user_name)}</td><td>${esc(r.book_title)}</td>
+    <td>${r.rented_on}</td><td>${r.due_date}</td>
+    <td><span class="badge2 s-${r.status}">${r.status}</span></td>
+  </tr>`).join(''):`<tr class="empty-row"><td colspan="5">No rentals yet.</td></tr>`;
+}
+async function loadBooks(){
+  const books=await(await fetch('/api/admin/books')).json();
+  const tbody=document.getElementById('books-tbody');
+  tbody.innerHTML=books.length?books.map(b=>`<tr>
+    <td><strong>${esc(b.title)}</strong></td><td>${esc(b.author)}</td>
+    <td>${esc(b.genre)}</td><td>₹${b.rental_price_per_day}</td>
+    <td>${b.total_copies}</td><td>${b.available_copies}</td>
+    <td>
+      <button class="btn btn-outline btn-sm" onclick="openEditBook(${b.id})">Edit</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteBook(${b.id})">Delete</button>
+    </td>
+  </tr>`).join(''):`<tr class="empty-row"><td colspan="7">No books yet.</td></tr>`;
+}
+function openAddBook(){
+  document.getElementById('b-id').value='';
+  document.getElementById('book-modal-title').textContent='Add Book';
+  ['b-title','b-author','b-price','b-desc'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('b-copies').value=1;
+  document.getElementById('b-genre').value='General';
+  document.getElementById('book-overlay').classList.add('open');
+}
+async function openEditBook(id){
+  const books=await(await fetch('/api/admin/books')).json();
+  const b=books.find(x=>x.id===id);
+  document.getElementById('b-id').value=b.id;
+  document.getElementById('book-modal-title').textContent='Edit Book';
+  document.getElementById('b-title').value=b.title;
+  document.getElementById('b-author').value=b.author;
+  document.getElementById('b-genre').value=b.genre;
+  document.getElementById('b-copies').value=b.total_copies;
+  document.getElementById('b-price').value=b.rental_price_per_day;
+  document.getElementById('b-desc').value=b.description;
+  document.getElementById('book-overlay').classList.add('open');
+}
+async function saveBook(){
+  const id=document.getElementById('b-id').value;
+  const payload={
+    title:document.getElementById('b-title').value.trim(),
+    author:document.getElementById('b-author').value.trim(),
+    genre:document.getElementById('b-genre').value,
+    total_copies:parseInt(document.getElementById('b-copies').value),
+    rental_price_per_day:parseFloat(document.getElementById('b-price').value),
+    description:document.getElementById('b-desc').value.trim(),
+  };
+  if(!payload.title||!payload.author||!payload.rental_price_per_day){toast('Title, author and price are required',true);return;}
+  const url=id?`/api/admin/books/${id}`:'/api/admin/books';
+  const method=id?'PUT':'POST';
+  const res=await fetch(url,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  if(!res.ok){const e=await res.json().catch(()=>{});toast(e?.error||'Error',true);return;}
+  closeBookModal();loadBooks();loadStats();toast(id?'Book updated!':'Book added!');
+}
+async function deleteBook(id){
+  if(!confirm('Delete this book and all its rentals?'))return;
+  const res=await fetch(`/api/admin/books/${id}`,{method:'DELETE'});
+  if(!res.ok){toast('Failed to delete',true);return;}
+  loadBooks();loadStats();toast('Book deleted.');
+}
+function closeBookModal(){document.getElementById('book-overlay').classList.remove('open');}
+function maybeCloseBook(e){if(e.target.id==='book-overlay')closeBookModal();}
+async function loadRentals(){
+  const status=document.getElementById('rental-status-filter').value;
+  const url='/api/admin/rentals'+(status?'?status='+status:'');
+  const rentals=await(await fetch(url)).json();
+  const tbody=document.getElementById('rentals-tbody');
+  tbody.innerHTML=rentals.length?rentals.map(r=>`<tr>
+    <td>${esc(r.user_name)}</td><td>${esc(r.book_title)}</td>
+    <td>${r.rented_on}</td><td>${r.due_date}</td><td>₹${r.cost}</td>
+    <td><span class="badge2 s-${r.status}">${r.status}</span></td>
+    <td>${r.status==='active'?`<button class="btn btn-danger btn-sm" onclick="adminReturn(${r.id})">Return</button>`:''}</td>
+  </tr>`).join(''):`<tr class="empty-row"><td colspan="7">No rentals found.</td></tr>`;
+}
+async function adminReturn(id){
+  if(!confirm('Mark as returned?'))return;
+  const res=await fetch(`/api/return/${id}`,{method:'POST'});
+  if(!res.ok){toast('Error',true);return;}
+  loadRentals();loadStats();toast('Marked as returned.');
+}
+async function loadUsers(){
+  const users=await(await fetch('/api/admin/users')).json();
+  const tbody=document.getElementById('users-tbody');
+  tbody.innerHTML=users.length?users.map(u=>`<tr>
+    <td>${esc(u.name)}</td><td>${esc(u.email)}</td><td>${u.role}</td>
+  </tr>`).join(''):`<tr class="empty-row"><td colspan="3">No members yet.</td></tr>`;
+}
+function toast(msg,err=false){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.style.background=err?'var(--red)':'var(--brown)';
+  el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+init();
+</script>
+</body>
+</html>

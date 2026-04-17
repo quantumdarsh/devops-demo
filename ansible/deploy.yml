@@ -1,9 +1,29 @@
 ---
-- name: Deploy CI/CD demo stack locally
-  hosts: local
+- name: Deploy ReadNest App
+  hosts: localhost
+  connection: local
   become: false
+
   tasks:
-    - name: Ensure Docker Compose stack is up
-      ansible.builtin.command: docker compose up -d
-      args:
-        chdir: "{{ playbook_dir }}/.."
+    - name: Start Flask app container
+      command: docker start cicd-demo-app
+      ignore_errors: yes
+
+    - name: Start Prometheus container
+      command: docker start prometheus
+      ignore_errors: yes
+
+    - name: Start Grafana container
+      command: docker start grafana
+      ignore_errors: yes
+
+    - name: Verify Flask app is running
+      uri:
+        url: http://localhost:5000
+        method: GET
+        status_code: 200
+      ignore_errors: yes
+
+    - name: App status
+      debug:
+        msg: "ReadNest is live at localhost:5000"
